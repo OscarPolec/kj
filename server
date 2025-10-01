@@ -1,0 +1,100 @@
+import java.io.*;
+import java.net.*;
+
+public class Server {
+    private static final int PORT = 12345;
+    private static Station station;
+
+    public static void main(String[] args) {
+        if (args.length < 1) {
+            System.out.println("Użycie: java Server <plik_konfiguracyjny>");
+            return;
+        }
+
+        String filename = args[0];
+
+        try {
+            station = Station.fromFile(filename);
+        } catch (IOException e) {
+            System.err.println("Błąd wczytywania pliku stacji: " + e.getMessage());
+            return;
+        }
+
+        System.out.println("Serwer stacji uruchomiony na porcie " + PORT);
+
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            while (true) {
+                try (Socket clientSocket = serverSocket.accept();
+                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+
+                    System.out.println("Połączono z klientem: " + clientSocket.getInetAddress());
+
+                    String command = in.readLine();
+                    System.out.println("Odebrano: " + command);
+
+                    String response = handleCommand(command);
+                    out.println(response);
+
+                    System.out.println("Wysłano odpowiedź: " + response);
+
+                } catch (IOException e) {
+                    System.err.println("Błąd w obsłudze klienta: " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Błąd serwera: " + e.getMessage());
+        }
+    }
+
+    private static String handleCommand(String cmd) {
+        if (cmd == null) return "FAIL";
+
+        String[] parts = cmd.trim().toUpperCase().split(" ");
+        if (parts.length == 0) return "FAIL UNKNOWN COMMAND";
+
+        try {
+            switch (parts[0]) {
+                case "RENT":
+                    if (parts.length >= 2) {
+                        switch (parts[1]) {
+                            case "VEHICLE":
+                                if (parts.length == 3) { // RENT VEHICLE <id>
+                                    int id = Integer.parseInt(parts[2]);
+                                    Vehicle v = station.rentVehicle(id);
+                                    return (v != null) ? "OK RENTED VEHICLE " + v.getIdPojazdu() : "FAIL NO SUCH VEHICLE";
+                                } else {
+                                    return "FAIL USAGE: RENT VEHICLE <id>";
+                                }
+                            case "BICYCLE":
+                                Vehicle b = station.rentBicycle();
+                                return (b != null) ? "OK RENTED BICYCLE " + b.getIdPojazdu() : "FAIL NO BICYCLE";
+                            case "SCOOTER":
+                                Vehicle s = station.rentScooter();
+                                return (s != null) ? "OK RENTED SCOOTER " + s.getIdPojazdu() : "FAIL NO SCOOTER";
+                        }
+                    }
+                    return "FAIL WRONG RENT COMMAND";
+
+                case "RETURN":
+                    if (parts.length == 3 && parts[1].equals("VEHICLE")) {
+                        int id = Integer.parseInt(parts[2]);
+                        try {
+                            // przykładowo traktujemy zwracany pojazd jako rower
+                            Vehicle v = new Bicycles(id);
+                            station.returnVehicle(v);
+                            return "OK RETURNED VEHICLE " + id;
+                        } catch (FullStationException e) {
+                            return "FAIL STATION FULL";
+                        }
+                    }
+                    return "FAIL USAGE: RETURN VEHICLE <id>";
+
+                default:
+                    return "FAIL UNKNOWN COMMAND";
+            }
+        } catch (Exception e) {
+            return "FAIL ERROR " + e.getMessage();
+        }
+    }
+}
