@@ -1,0 +1,16 @@
+public class Scooter extends Vehicle {
+    private int PoziomBaterii;
+
+    public Scooter( int PoziomBaterii, int IdPojazdu){
+        super(IdPojazdu);
+        if(PoziomBaterii >= 0 && PoziomBaterii <= 100){
+            this.PoziomBaterii = PoziomBaterii;
+        }else {
+            System.out.println("Błąd");
+        }
+    }
+
+    public int getPoziomBaterii() {
+        return PoziomBaterii;
+    }
+}
