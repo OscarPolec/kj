@@ -1,0 +1,11 @@
+public abstract class Vehicle {
+    private int IdPojazdu;
+
+    public Vehicle(int idPojazdu) {
+        IdPojazdu = idPojazdu;
+    }
+
+    public int getIdPojazdu() {
+        return IdPojazdu;
+    }
+}
