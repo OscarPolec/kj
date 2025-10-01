@@ -1,0 +1,104 @@
+import java.io.IOException;
+import java.util.List;
+
+public class Station {
+    private int l_uchwytow;
+    private String id;
+
+    public int getL_uchwytow() {
+        return l_uchwytow;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    List<Vehicle>lista;
+
+    public Station(int l_uchwytow, String id, List<Vehicle> lista) {
+        this.l_uchwytow = l_uchwytow;
+        this.id = id;
+        this.lista = lista;
+    }
+
+    public Vehicle rentVehicle(int IdPojazdu){
+        for(Vehicle v: lista) {
+            if (v.getIdPojazdu() == IdPojazdu) {
+                lista.remove(v);
+                return v;
+            }
+        }
+        return  null;
+    }
+
+    public void returnVehicle(Vehicle v)throws FullStationException, IOException {
+        if(lista.isEmpty()){
+            throw new FullStationException("a");
+        }else{
+            lista.add(v);
+        }
+    }
+
+    public Bicycles rentBicykle(){
+        for(Vehicle v: lista){
+            if(v instanceof Bicycles ){
+                lista.remove(v);
+                return (Bicycles) v;
+            }
+        }
+        return null;
+    }
+
+    public Scooter rentScooter(){
+        Scooter najlepsza = null;
+        for(Vehicle v: lista){
+            if(v instanceof Scooter){
+                Scooter hulajnoga = (Scooter) v;
+                if(najlepsza == null || hulajnoga.getPoziomBaterii() > najlepsza.getPoziomBaterii()){
+                    najlepsza = hulajnoga;
+                }
+            }
+        }
+        if(najlepsza != null){
+            lista.remove(najlepsza);
+        }
+        return najlepsza;
+    }
+
+    public void dump() throws IOException {
+        try (FileWriter writer = new FileWriter(filename)) {
+
+            writer.write(stationId + " " + numOfSlot + "\n");
+            for (Vehicle v : vehicles) {
+                if (v instanceof Bicycles) {
+                    writer.write("Bicycle" + v.getId() + "\n");
+                } else if (v instanceof Scooter) {
+                    Scooter s = (Scooter) v;
+                    writer.write("Scooter" + s.getId() + "," + s.getBatterLvl() + "\n");
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    public void metodaWytworcza(int idstation) throws IOException{
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))){
+            String header = br.readLine();
+            if (header == null) return;
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                String stationajdi = Arrays.toString(br.readLine().split(","));
+
+
+            }
+        } catch (IOException e) {
+
+            throw new RuntimeException(e);
+        }
+    }
+
+}
