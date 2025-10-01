@@ -14,7 +14,8 @@ public class Server {
         String filename = args[0];
 
         try {
-            station = Station.fromFile(filename);
+            // Używamy Twojej metody wytwórczej
+            station = Station.metodaWytworcza(filename);
         } catch (IOException e) {
             System.err.println("Błąd wczytywania pliku stacji: " + e.getMessage());
             return;
@@ -59,7 +60,7 @@ public class Server {
                     if (parts.length >= 2) {
                         switch (parts[1]) {
                             case "VEHICLE":
-                                if (parts.length == 3) { // RENT VEHICLE <id>
+                                if (parts.length == 3) {
                                     int id = Integer.parseInt(parts[2]);
                                     Vehicle v = station.rentVehicle(id);
                                     return (v != null) ? "OK RENTED VEHICLE " + v.getIdPojazdu() : "FAIL NO SUCH VEHICLE";
@@ -67,7 +68,7 @@ public class Server {
                                     return "FAIL USAGE: RENT VEHICLE <id>";
                                 }
                             case "BICYCLE":
-                                Vehicle b = station.rentBicycle();
+                                Vehicle b = station.rentBicykle();
                                 return (b != null) ? "OK RENTED BICYCLE " + b.getIdPojazdu() : "FAIL NO BICYCLE";
                             case "SCOOTER":
                                 Vehicle s = station.rentScooter();
@@ -80,7 +81,7 @@ public class Server {
                     if (parts.length == 3 && parts[1].equals("VEHICLE")) {
                         int id = Integer.parseInt(parts[2]);
                         try {
-                            // przykładowo traktujemy zwracany pojazd jako rower
+                            // dla uproszczenia zwracamy rower
                             Vehicle v = new Bicycles(id);
                             station.returnVehicle(v);
                             return "OK RETURNED VEHICLE " + id;
